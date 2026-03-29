@@ -4,14 +4,15 @@ return (
     <>
     <div id="navbar">
         <div id="logo">
-            <p>Choretracker</p>
+            <h1>ChoreTracker</h1>
+            <p>Keep your home sparkling clean</p>
         </div>
         <div id="nav-links">
             <ul>
-                <li>Dashboard</li>
-                <li>Tasks</li>
-                <li>Users</li>
-                <li>Analytics</li>
+                <li><a href="#">Dashboard</a></li>
+                <li><a href="#">Tasks</a></li>
+                <li><a href="#">Users</a></li>
+                <li><a href="#">Analytics</a></li>
             </ul>
         </div>
     </div>
