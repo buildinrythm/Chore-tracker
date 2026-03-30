@@ -21,10 +21,10 @@ function App() {
     <a href="#">View All →</a>
   </div>
   <div id="team-grid">
-    <TeamMember avatar="😭" name="John" tasksCompleted={12} color="#DBEAFF" />
-    <TeamMember avatar="😭" name="John" tasksCompleted={12} color="#DCFCE6"/>
-    <TeamMember avatar="😭" name="John" tasksCompleted={12} color="#FEE2E2"/>
-    <TeamMember avatar="😭" name="John" tasksCompleted={12} color="#F3E8FE"/>
+    <TeamMember avatar="😭" name="Sarah" tasksCompleted={12} color="#F3E8FE"/>
+    <TeamMember avatar="😎" name="Mike" tasksCompleted={12} color="#DCFCE6"/>
+    <TeamMember avatar="😳" name="Emma" tasksCompleted={12} color="#FEE2E2"/>
+    <TeamMember avatar="☺️" name="Jake" tasksCompleted={12} color="#DBEAFF"/>
   </div>
 </div>
     </>
