@@ -1,0 +1,75 @@
+#room-header {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.decay-bar-bg {
+  width: 100%;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 999px;
+}
+
+.decay-bar-fill {
+  height: 8px;
+  border-radius: 999px;
+  background-color: #22c55e;
+}
+
+.rc-cont-top{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    position: relative;
+    
+}
+
+.rc-icon{
+  font-size: 2rem;
+  display: flex;
+align-items: center;
+justify-content: center;
+border-radius: 0.75rem;
+padding: 1.5rem;
+}
+
+
+.rc-cont{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: start;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);  
+    padding: 1.5rem;
+    
+    
+}
+
+.rc-cont-mid{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%
+}
+
+#room-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.overdue-ir{
+  color: red;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.25em 0.5em;
+  border-radius: 1em;
+  font-size: 1rem;
+  font-weight: bold;
+}

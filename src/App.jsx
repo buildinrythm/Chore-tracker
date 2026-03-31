@@ -1,6 +1,7 @@
 import Header from './components/Header.jsx'
 import StatCard from './components/StatCard.jsx'
 import TeamMember from './components/TeamMember.jsx'
+import RoomCard from './components/RoomCard.jsx'
 import { List, CheckCircle, AlertCircle, Users } from 'lucide-react'
 
 
@@ -27,6 +28,20 @@ function App() {
     <TeamMember avatar="☺️" name="Jake" tasksCompleted={12} color="#DBEAFF"/>
   </div>
 </div>
+<div id="room-header">
+    <h2>Rooms</h2>
+    <button>+ Add Room</button>
+  </div>
+  <div id="room-grid">
+    <RoomCard icon="🍽️" name="Kitchen" pendingTasks={3} decayPercent={90} lastCleaned={1} overdueIndicator={2} color="#DCFCE6"/>
+    <RoomCard icon="🛋️" name="Living Room" pendingTasks={2} decayPercent={100} lastCleaned={10} overdueIndicator={2} color="#F3E8FE"/>
+    <RoomCard icon="🛁" name="Bathroom" pendingTasks={3} decayPercent={67} lastCleaned={2} overdueIndicator={1} color="#DBEAFF"/>
+    <RoomCard icon="🛌" name="Bedroom" pendingTasks={2} decayPercent={100} lastCleaned={1} overdueIndicator={2} color="#FEFAE4"/>
+    <RoomCard icon="👔" name="Laundry Room" pendingTasks={1} decayPercent={14} lastCleaned={2} overdueIndicator={0} color="#DCFCE6"/>
+    <RoomCard icon="🚗" name="Garage" pendingTasks={1} decayPercent={100} lastCleaned={1} overdueIndicator={1} color="#F3E8FE"/>
+    
+    
+  </div>
     </>
   )
 }
