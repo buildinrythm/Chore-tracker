@@ -1,15 +1,28 @@
+import { supabase } from './supabase.js'
 import Header from './components/Header.jsx'
 import StatCard from './components/StatCard.jsx'
 import TeamMember from './components/TeamMember.jsx'
 import RoomCard from './components/RoomCard.jsx'
 import { List, CheckCircle, AlertCircle, Users } from 'lucide-react'
 
+async function testConnection() {
+  const { data, error } = await supabase
+    .from('households')
+    .insert({ name: 'Test Household', invite_code: 'ABC123' })
+    .select()
 
+  if (error) {
+    console.log('Error:', error)
+  } else {
+    console.log('Success:', data)
+  }
+}
 
 function App() {
   return (
     <>
       <Header />
+      <button onClick={testConnection}>Test Connection</button>
       <div id="statcard-container">
       <StatCard title="Total Tasks" count={12} icon={<List color="#165DFC"/>} color="#DBEAFF" />
       <StatCard title="Completed Today" count={0} icon={<CheckCircle color="#00A63D"/>} color="#DCFCE6" />
