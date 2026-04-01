@@ -29,13 +29,17 @@ function RoomCard({ name, icon, decayPercent, pendingTasks, lastCleaned, color, 
             <h2>{name}</h2>
             <p>{pendingTasks} tasks</p>
         </div>
+        {overdueIndicator > 0 && (
         <span className="overdue-ir">❗️{overdueIndicator}</span>
+)}
     </div>
     <div className="rc-cont-mid">
       <p>{decayStatus.label}</p>
       <p>{decayPercent}%</p>
     </div>
+    <div className="decay-bar-bg" style={{ width: `${100}%`,backgroundColor: "grey"}}>
     <div className="decay-bar-fill" style={{ width: `${decayPercent}%`,backgroundColor: decayStatus.color }}>
+      </div>
     </div>
     <div>
         <p>☑ Last cleaned {lastCleaned} day/s ago</p>
