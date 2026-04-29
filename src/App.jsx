@@ -14,6 +14,17 @@ function getDecayPercentage(lastCleanedDate, maxDays = 7) {
   return Math.min((daysSinceCleaned / maxDays) * 100, 100)
 }
 
+function getLastCleanedText(lastCleanedDate) {
+  const now = new Date()
+  const lastCleaned = new Date(lastCleanedDate)
+  const diffMs = now - lastCleaned
+  const daysSince = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  if (daysSince === 0) return 'today'
+  if (daysSince === 1) return '1 day ago'
+  return `${daysSince} days ago`
+}
+
 function App() {
 
   const [rooms, setRooms] = useState([])
@@ -59,16 +70,22 @@ function App() {
     <h2>Rooms</h2>
     <button>+ Add Room</button>
   </div>
+
   <div id="room-grid">
-    <RoomCard icon="🍽️" name="Kitchen" pendingTasks={3} decayPercent={90} lastCleaned={1} overdueIndicator={2} color="#DCFCE6"/>
-    <RoomCard icon="🛋️" name="Living Room" pendingTasks={2} decayPercent={100} lastCleaned={10} overdueIndicator={2} color="#F3E8FE"/>
-    <RoomCard icon="🛁" name="Bathroom" pendingTasks={3} decayPercent={67} lastCleaned={2} overdueIndicator={1} color="#DBEAFF"/>
-    <RoomCard icon="🛌" name="Bedroom" pendingTasks={2} decayPercent={100} lastCleaned={1} overdueIndicator={2} color="#FEFAE4"/>
-    <RoomCard icon="👔" name="Laundry Room" pendingTasks={1} decayPercent={14} lastCleaned={2} overdueIndicator={0} color="#DCFCE6"/>
-    <RoomCard icon="🚗" name="Garage" pendingTasks={1} decayPercent={100} lastCleaned={1} overdueIndicator={1} color="#F3E8FE"/>
-    
-    
-  </div>
+  {rooms.map((room) => (
+    <RoomCard
+      key={room.id}
+      name={room.name}
+      decayPercent={getDecayPercentage(room.last_cleaned, room.decay_rate)}
+      lastCleaned={getLastCleanedText(room.last_cleaned)}
+      pendingTasks={0}
+      overdueIndicator={0}
+      color="#DCFCE6"
+      icon="🏠"
+    />
+  ))}
+
+</div>
     </>
   )
 }

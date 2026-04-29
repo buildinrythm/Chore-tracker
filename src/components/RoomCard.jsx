@@ -12,6 +12,7 @@ function getDecayStatus(decayPercent) {
   }
 }
 
+
 function RoomCard({ name, icon, decayPercent, pendingTasks, lastCleaned, color, overdueIndicator }) {
   const decayStatus = getDecayStatus(decayPercent)
 
