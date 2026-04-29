@@ -4,8 +4,36 @@ import StatCard from './components/StatCard.jsx'
 import TeamMember from './components/TeamMember.jsx'
 import RoomCard from './components/RoomCard.jsx'
 import { List, CheckCircle, AlertCircle, Users } from 'lucide-react'
+import { useState, useEffect } from 'react'
+
+function getDecayPercentage(lastCleanedDate, maxDays = 7) {
+  const now = new Date()
+  const lastCleaned = new Date(lastCleanedDate)
+  const diffMs = now - lastCleaned
+  const daysSinceCleaned = diffMs / (1000 * 60 * 60 * 24)
+  return Math.min((daysSinceCleaned / maxDays) * 100, 100)
+}
 
 function App() {
+
+  const [rooms, setRooms] = useState([])
+
+  useEffect(() => {
+    fetchRooms()
+  }, [])
+
+  async function fetchRooms() {
+    const { data, error } = await supabase
+      .from('rooms')
+      .select('*')
+
+    if (error) {
+      console.log(error)
+    } else {
+      setRooms(data)        
+    }
+  }
+  console.log(rooms)
   return (
     <>
       <Header />
