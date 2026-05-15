@@ -25,6 +25,23 @@ function getLastCleanedText(lastCleanedDate) {
   return `${daysSince} days ago`
 }
 
+const roomIcons = {
+  'Kitchen': '🍽️',
+  'Bathroom': '🛁',
+  'Living Room': '🛋️',
+  'Bedroom': '👔',
+  'Garage': '🚗'
+}
+
+const roomColors = {
+  'Kitchen': '#DCFCE6',
+  'Bathroom': '#DBEAFF',
+  'Living Room': '#F3E8FE',
+  'Bedroom': '#FEFAE4',
+  'Laundry Room': '#FEE2E2',
+  'Garage': '#F3E8FE'
+}
+
 function App() {
 
   const [rooms, setRooms] = useState([])
@@ -81,7 +98,7 @@ function App() {
       pendingTasks={0}
       overdueIndicator={0}
       color="#DCFCE6"
-      icon="🏠"
+      icon={roomIcons[room.name] || '🏠'}
     />
   ))}
 
