@@ -1,28 +1,29 @@
-#logo{
-  color: black
-}
-
 #navbar {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
 }
 
-#nav-links ul{
+#logo {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-#nav-links a {
-  text-decoration: none;
+  align-items: center;
+  gap: 0.75rem;
   color: black;
 }
 
-#nav-links li{
-  list-style-type: none;
+#logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: var(--primary);
+  color: white;
 }
 
 #logo h1 {
@@ -33,4 +34,35 @@
 #logo p {
   font-size: 0.875rem;
   margin: 0;
+  color: #6b7280;
+}
+
+#nav-links {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #374151;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.nav-link.active {
+  background: var(--primary);
+  color: white;
+}
+
+#navbar button {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
 }

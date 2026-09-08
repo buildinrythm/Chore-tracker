@@ -1,4 +1,5 @@
 import '../styles/RoomCard.css'
+import { AlertCircle } from 'lucide-react'
 
 function getDecayStatus(decayPercent) {
   if (decayPercent <= 25) {
@@ -13,40 +14,38 @@ function getDecayStatus(decayPercent) {
 }
 
 
-function RoomCard({ name, icon, decayPercent, pendingTasks, lastCleaned, color, overdueIndicator }) {
+function RoomCard({ name, icon, decayPercent, pendingTasks, lastCleaned, color, overdueIndicator, onMarkCleaned }) {
   const decayStatus = getDecayStatus(decayPercent)
 
   return (
-    <>
-    <div  className="rc-cont" style={{
-    backgroundColor: decayStatus.backgroundColor,
-    borderColor: decayStatus.color, // This sets the border color
-    borderWidth: '2px',             // Make sure to set a border width
-    borderStyle: 'solid'            // And a border style
-  }}>
-    <div className="rc-cont-top">
+    <div className="rc-cont" style={{
+      backgroundColor: decayStatus.backgroundColor,
+      borderColor: decayStatus.color,
+      borderWidth: '2px',
+      borderStyle: 'solid'
+    }}>
+      <div className="rc-cont-top">
         <span className="rc-icon" style={{ backgroundColor: color }}>{icon}</span>
         <div className="rc-name-pt">
-            <h2>{name}</h2>
-            <p>{pendingTasks} tasks</p>
+          <h2>{name}</h2>
+          <p>{pendingTasks} tasks</p>
         </div>
         {overdueIndicator > 0 && (
-        <span className="overdue-ir">❗️{overdueIndicator}</span>
-)}
-    </div>
-    <div className="rc-cont-mid">
-      <p>{decayStatus.label}</p>
-      <p>{decayPercent}%</p>
-    </div>
-    <div className="decay-bar-bg" style={{ width: `${100}%`,backgroundColor: "grey"}}>
-    <div className="decay-bar-fill" style={{ width: `${decayPercent}%`,backgroundColor: decayStatus.color }}>
+          <span className="overdue-ir"><AlertCircle size={14} />{overdueIndicator}</span>
+        )}
+      </div>
+      <div className="rc-cont-mid">
+        <p>{decayStatus.label}</p>
+        <p>{decayPercent}%</p>
+      </div>
+      <div className="decay-bar-bg">
+        <div className="decay-bar-fill" style={{ width: `${decayPercent}%`, backgroundColor: decayStatus.color }} />
+      </div>
+      <div className="rc-last-cleaned-row">
+        <p>☑ Last cleaned {lastCleaned}</p>
+        <button type="button" className="rc-mark-clean" onClick={onMarkCleaned}>Mark Clean</button>
       </div>
     </div>
-    <div>
-        <p>☑ Last cleaned {lastCleaned} day/s ago</p>
-    </div>
-    </div>
-    </>
   )
 }
 

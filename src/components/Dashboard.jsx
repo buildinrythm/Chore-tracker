@@ -1,108 +1,99 @@
-import { supabase } from '../supabase.js'
 import Header from './Header.jsx'
 import StatCard from './StatCard.jsx'
 import TeamMember from './TeamMember.jsx'
 import RoomCard from './RoomCard.jsx'
 import { List, CheckCircle, AlertCircle, Users } from 'lucide-react'
-import { useState, useEffect } from 'react'
-
-function getDecayPercentage(lastCleanedDate, maxDays = 7) {
-  const now = new Date()
-  const lastCleaned = new Date(lastCleanedDate)
-  const diffMs = now - lastCleaned
-  const daysSinceCleaned = diffMs / (1000 * 60 * 60 * 24)
-  return Math.min((daysSinceCleaned / maxDays) * 100, 100)
-}
-
-function getLastCleanedText(lastCleanedDate) {
-  const now = new Date()
-  const lastCleaned = new Date(lastCleanedDate)
-  const diffMs = now - lastCleaned
-  const daysSince = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (daysSince === 0) return 'today'
-  if (daysSince === 1) return '1 day ago'
-  return `${daysSince} days ago`
-}
-
-const roomIcons = {
-  'Kitchen': '🍽️',
-  'Bathroom': '🛁',
-  'Living Room': '🛋️',
-  'Bedroom': '👔',
-  'Garage': '🚗'
-}
-
-const roomColors = {
-  'Kitchen': '#DCFCE6',
-  'Bathroom': '#DBEAFF',
-  'Living Room': '#F3E8FE',
-  'Bedroom': '#FEFAE4',
-  'Laundry Room': '#FEE2E2',
-  'Garage': '#F3E8FE'
-}
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useChoreData } from '../hooks/useChoreData.js'
+import { getDecayPercentage, timeAgo, isOverdue, isOpenTask, isSameDay, roomIcons, roomColors } from '../lib/chores.js'
 
 function Dashboard() {
+  const { rooms, tasks, profiles, addRoom, markRoomCleaned } = useChoreData()
+  const [addingRoom, setAddingRoom] = useState(false)
+  const [newRoomName, setNewRoomName] = useState('')
 
-  const [rooms, setRooms] = useState([])
+  async function handleAddRoom(e) {
+    e.preventDefault()
+    if (!newRoomName.trim()) return
 
-  useEffect(() => {
-    fetchRooms()
-  }, [])
-
-  async function fetchRooms() {
-    const { data, error } = await supabase
-      .from('rooms')
-      .select('*')
-
-    if (error) {
-      console.log(error)
-    } else {
-      setRooms(data)        
+    const { error } = await addRoom(newRoomName.trim())
+    if (!error) {
+      setNewRoomName('')
+      setAddingRoom(false)
     }
   }
-  console.log(rooms)
+
+  const today = new Date()
+  const completedToday = tasks.filter((task) => task.completed_at && isSameDay(new Date(task.completed_at), today)).length
+  const overdueTasks = tasks.filter(isOverdue)
+
   return (
     <>
       <Header />
       <div id="statcard-container">
-      <StatCard title="Total Tasks" count={12} icon={<List color="#165DFC"/>} color="#DBEAFF" />
-      <StatCard title="Completed Today" count={0} icon={<CheckCircle color="#00A63D"/>} color="#DCFCE6" />
-      <StatCard title="Overdue" count={8} icon={<AlertCircle color="#E7000B"/>} color="#FEE2E2" />
-      <StatCard title="Team Members" count={4} icon={<Users color="#980FFA" />} color="#F3E8FE" />
+        <StatCard title="Total Tasks" count={tasks.length} icon={<List color="#165DFC"/>} color="#DBEAFF" />
+        <StatCard title="Completed Today" count={completedToday} icon={<CheckCircle color="#00A63D"/>} color="#DCFCE6" />
+        <StatCard title="Overdue" count={overdueTasks.length} icon={<AlertCircle color="#E7000B"/>} color="#FEE2E2" />
+        <StatCard title="Team Members" count={profiles.length} icon={<Users color="#980FFA" />} color="#F3E8FE" />
       </div>
       <div id="team-section">
-  <div id="team-header">
-    <h2>Team Members</h2>
-    <a href="#">View All →</a>
-  </div>
-  <div id="team-grid">
-    <TeamMember avatar="😭" name="Sarah" tasksCompleted={12} color="#F3E8FE"/>
-    <TeamMember avatar="😎" name="Mike" tasksCompleted={12} color="#DCFCE6"/>
-    <TeamMember avatar="😳" name="Emma" tasksCompleted={12} color="#FEE2E2"/>
-    <TeamMember avatar="☺️" name="Jake" tasksCompleted={12} color="#DBEAFF"/>
-  </div>
-</div>
-<div id="room-header">
-    <h2>Rooms</h2>
-    <button>+ Add Room</button>
-  </div>
+        <div id="team-header">
+          <h2>Team Members</h2>
+          <Link to="/users">View All →</Link>
+        </div>
+        <div id="team-grid">
+          {profiles.map((profile) => (
+            <TeamMember
+              key={profile.id}
+              avatar={profile.avatar}
+              name={profile.name}
+              tasksCompleted={tasks.filter((task) => task.assigned_to === profile.id && task.completed_at).length}
+              color="#DCFCE6"
+            />
+          ))}
+        </div>
+      </div>
+      <div id="room-header">
+        <h2>Rooms</h2>
+        {addingRoom ? (
+          <form id="add-room-form" onSubmit={handleAddRoom}>
+            <input
+              autoFocus
+              type="text"
+              placeholder="Room name"
+              value={newRoomName}
+              onChange={(e) => setNewRoomName(e.target.value)}
+            />
+            <button type="submit" className="btn-primary">Save</button>
+            <button type="button" className="btn-secondary" onClick={() => { setAddingRoom(false); setNewRoomName('') }}>Cancel</button>
+          </form>
+        ) : (
+          <button type="button" className="btn-primary" onClick={() => setAddingRoom(true)}>+ Add Room</button>
+        )}
+      </div>
 
-  <div id="room-grid">
-  {rooms.map((room) => (
-    <RoomCard
-      key={room.id}
-      name={room.name}
-      decayPercent={getDecayPercentage(room.last_cleaned, room.decay_rate)}
-      lastCleaned={getLastCleanedText(room.last_cleaned)}
-      pendingTasks={0}
-      overdueIndicator={0}
-      color="#DCFCE6"
-      icon={roomIcons[room.name] || '🏠'}
-    />
-  ))}
+      <div id="room-grid">
+        {rooms.map((room) => {
+          const roomTasks = tasks.filter((task) => task.room_id === room.id)
+          const openTasks = roomTasks.filter(isOpenTask)
+          const overdueCount = roomTasks.filter(isOverdue).length
 
-</div>
+          return (
+            <RoomCard
+              key={room.id}
+              name={room.name}
+              decayPercent={getDecayPercentage(room.last_cleaned, room.decay_rate)}
+              lastCleaned={timeAgo(room.last_cleaned)}
+              pendingTasks={openTasks.length}
+              overdueIndicator={overdueCount}
+              color={roomColors[room.name] || '#DCFCE6'}
+              icon={roomIcons[room.name] || '🏠'}
+              onMarkCleaned={() => markRoomCleaned(room.id)}
+            />
+          )
+        })}
+      </div>
     </>
   )
 }

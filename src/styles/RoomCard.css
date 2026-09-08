@@ -1,7 +1,13 @@
 #room-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
 
+#add-room-form {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .decay-bar-bg {
@@ -24,7 +30,7 @@
     gap: 20px;
     width: 100%;
     position: relative;
-    
+
 }
 
 .rc-icon{
@@ -42,11 +48,10 @@ padding: 1.5rem;
     flex-direction: column;
     justify-content: space-between;
     align-items: start;
+    gap: 0.75rem;
     border-radius: 0.75rem;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);  
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     padding: 1.5rem;
-    
-    
 }
 
 .rc-cont-mid{
@@ -64,12 +69,33 @@ padding: 1.5rem;
 }
 
 .overdue-ir{
-  color: red;
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  color: #dc2626;
   position: absolute;
   top: 0;
   right: 0;
   padding: 0.25em 0.5em;
   border-radius: 1em;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: bold;
+}
+
+.rc-last-cleaned-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.rc-mark-clean {
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
 }
