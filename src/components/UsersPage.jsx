@@ -2,59 +2,55 @@ import Header from './Header.jsx'
 import { useState } from 'react'
 import { useChoreData } from '../hooks/useChoreData.js'
 import { startOfWeek } from '../lib/chores.js'
-import { Trophy, Pencil, Trash2 } from 'lucide-react'
+import { Trophy, Pencil, Copy } from 'lucide-react'
 import '../styles/UsersPage.css'
 
 const RANK_STYLES = ['rank-gold', 'rank-silver', 'rank-bronze']
 const MEDALS = ['🥇', '🥈', '🥉']
 
 function UsersPage() {
-  const { profiles, tasks, completions, addMember, updateMember, deleteMember } = useChoreData()
-  const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name: '', avatar: '🙂' })
-  const [editingId, setEditingId] = useState(null)
+  const { household, me, members, tasks, logs, loading, updateMyProfile } = useChoreData()
+  const [editing, setEditing] = useState(false)
   const [editForm, setEditForm] = useState({ name: '', avatar: '' })
+  const [copied, setCopied] = useState(false)
+
+  if (loading || !household || !me) return null
 
   const weekStart = startOfWeek()
 
-  const stats = profiles
-    .map((profile) => {
-      const profileCompletions = completions.filter((c) => c.completed_by === profile.id)
-      const totalCompleted = profileCompletions.length
-      const thisWeek = profileCompletions.filter((c) => new Date(c.completed_at) >= weekStart).length
-      const assigned = tasks.filter((task) => task.assigned_to === profile.id).length
-      return { ...profile, totalCompleted, thisWeek, assigned }
+  const stats = members
+    .map((member) => {
+      const memberLogs = logs.filter((log) => log.user_id === member.id)
+      const totalCompleted = memberLogs.length
+      const thisWeek = memberLogs.filter((log) => new Date(log.completed_at) >= weekStart).length
+      const assigned = tasks.filter((task) => task.assigned_to === member.id).length
+      return { ...member, totalCompleted, thisWeek, assigned }
     })
     .sort((a, b) => b.totalCompleted - a.totalCompleted)
 
   const podium = stats.slice(0, 3)
 
-  async function handleAddMember(e) {
-    e.preventDefault()
-    if (!form.name.trim()) return
-
-    const { error } = await addMember({ name: form.name.trim(), avatar: form.avatar.trim() || '🙂' })
-    if (!error) {
-      setForm({ name: '', avatar: '🙂' })
-      setShowForm(false)
-    }
+  function startEditing() {
+    setEditForm({ name: me.name, avatar: me.avatar })
+    setEditing(true)
   }
 
-  function startEditing(member) {
-    setEditingId(member.id)
-    setEditForm({ name: member.name, avatar: member.avatar })
-  }
-
-  async function handleUpdateMember(e) {
+  async function handleUpdateProfile(e) {
     e.preventDefault()
     if (!editForm.name.trim()) return
 
-    const { error } = await updateMember(editingId, { name: editForm.name.trim(), avatar: editForm.avatar.trim() || '🙂' })
-    if (!error) setEditingId(null)
+    const { error } = await updateMyProfile({ name: editForm.name.trim(), avatar: editForm.avatar.trim() || '🙂' })
+    if (!error) setEditing(false)
   }
 
-  function handleDeleteMember(member) {
-    if (window.confirm(`Remove ${member.name} from the team?`)) deleteMember(member.id)
+  async function handleCopyInvite() {
+    try {
+      await navigator.clipboard.writeText(household.invite_code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard access denied - the code is still visible on screen to copy manually
+    }
   }
 
   return (
@@ -62,30 +58,20 @@ function UsersPage() {
       <Header />
       <div className="users-header">
         <h1>Team Members</h1>
-        <button type="button" className="btn-primary" onClick={() => setShowForm((v) => !v)}>+ Add Member</button>
       </div>
 
-      {showForm && (
-        <form className="member-form" onSubmit={handleAddMember}>
-          <input
-            type="text"
-            placeholder="🙂"
-            maxLength={4}
-            value={form.avatar}
-            onChange={(e) => setForm({ ...form, avatar: e.target.value })}
-            className="member-form-avatar"
-          />
-          <input
-            type="text"
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-            autoFocus
-          />
-          <button type="submit" className="btn-primary">Add</button>
-        </form>
-      )}
+      <div className="invite-banner">
+        <div>
+          <strong>{household.name}</strong>
+          <p>Invite household members to join with this code:</p>
+        </div>
+        <div className="invite-code-row">
+          <span className="invite-code">{household.invite_code}</span>
+          <button type="button" className="btn-secondary" onClick={handleCopyInvite}>
+            <Copy size={14} /> {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+      </div>
 
       {podium.length > 0 && (
         <div className="podium">
@@ -107,9 +93,9 @@ function UsersPage() {
       <div className="all-members">
         <h2>All Team Members</h2>
         {stats.map((member, index) => {
-          if (editingId === member.id) {
+          if (editing && member.id === me.id) {
             return (
-              <form key={member.id} className="member-form member-edit-form" onSubmit={handleUpdateMember}>
+              <form key={member.id} className="member-form member-edit-form" onSubmit={handleUpdateProfile}>
                 <input
                   type="text"
                   maxLength={4}
@@ -125,7 +111,7 @@ function UsersPage() {
                   autoFocus
                 />
                 <button type="submit" className="btn-primary">Save</button>
-                <button type="button" className="btn-secondary" onClick={() => setEditingId(null)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => setEditing(false)}>Cancel</button>
               </form>
             )
           }
@@ -135,7 +121,7 @@ function UsersPage() {
               <span className="member-rank">#{index + 1}</span>
               <span className="member-avatar">{member.avatar}</span>
               <div className="member-row-name">
-                <strong>{member.name}</strong>
+                <strong>{member.name}{member.id === me.id ? ' (you)' : ''}</strong>
                 <p>{member.totalCompleted} tasks completed</p>
               </div>
               <div className="member-row-stats">
@@ -144,12 +130,9 @@ function UsersPage() {
                 <div><span>Total</span><strong>{member.totalCompleted}</strong></div>
               </div>
               <Trophy size={20} color="#eab308" />
-              <button type="button" className="icon-btn" onClick={() => startEditing(member)} aria-label={`Edit ${member.name}`}>
-                <Pencil size={16} />
-              </button>
-              {!member.user_id && (
-                <button type="button" className="icon-btn" onClick={() => handleDeleteMember(member)} aria-label={`Remove ${member.name}`}>
-                  <Trash2 size={16} />
+              {member.id === me.id && (
+                <button type="button" className="icon-btn" onClick={startEditing} aria-label="Edit your profile">
+                  <Pencil size={16} />
                 </button>
               )}
             </div>

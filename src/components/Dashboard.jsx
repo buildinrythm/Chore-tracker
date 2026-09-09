@@ -9,7 +9,7 @@ import { useChoreData } from '../hooks/useChoreData.js'
 import { getDecayPercentage, timeAgo, isOverdue, isOpenTask, isSameDay, roomIcons, roomColors } from '../lib/chores.js'
 
 function Dashboard() {
-  const { rooms, tasks, profiles, addRoom, updateRoom, deleteRoom, markRoomCleaned } = useChoreData()
+  const { rooms, tasks, members, logs, addRoom, updateRoom, deleteRoom, markRoomCleaned } = useChoreData()
   const [addingRoom, setAddingRoom] = useState(false)
   const [newRoomName, setNewRoomName] = useState('')
 
@@ -25,7 +25,7 @@ function Dashboard() {
   }
 
   const today = new Date()
-  const completedToday = tasks.filter((task) => task.completed_at && isSameDay(new Date(task.completed_at), today)).length
+  const completedToday = tasks.filter((task) => task.last_completed && isSameDay(new Date(task.last_completed), today)).length
   const overdueTasks = tasks.filter(isOverdue)
 
   return (
@@ -35,7 +35,7 @@ function Dashboard() {
         <StatCard title="Total Tasks" count={tasks.length} icon={<List color="#165DFC"/>} color="#DBEAFF" />
         <StatCard title="Completed Today" count={completedToday} icon={<CheckCircle color="#00A63D"/>} color="#DCFCE6" />
         <StatCard title="Overdue" count={overdueTasks.length} icon={<AlertCircle color="#E7000B"/>} color="#FEE2E2" />
-        <StatCard title="Team Members" count={profiles.length} icon={<Users color="#980FFA" />} color="#F3E8FE" />
+        <StatCard title="Team Members" count={members.length} icon={<Users color="#980FFA" />} color="#F3E8FE" />
       </div>
       <div id="team-section">
         <div id="team-header">
@@ -43,12 +43,12 @@ function Dashboard() {
           <Link to="/users">View All →</Link>
         </div>
         <div id="team-grid">
-          {profiles.map((profile) => (
+          {members.map((member) => (
             <TeamMember
-              key={profile.id}
-              avatar={profile.avatar}
-              name={profile.name}
-              tasksCompleted={tasks.filter((task) => task.assigned_to === profile.id && task.completed_at).length}
+              key={member.id}
+              avatar={member.avatar}
+              name={member.name}
+              tasksCompleted={logs.filter((log) => log.user_id === member.id).length}
               color="#DCFCE6"
             />
           ))}

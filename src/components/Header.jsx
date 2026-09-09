@@ -1,6 +1,6 @@
 import '../styles/Header.css'
 import { supabase } from '../supabase.js'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Home, ListChecks, Users, BarChart3 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -19,11 +19,13 @@ const SUBTITLES = {
 
 function Header() {
   const location = useLocation()
+  const navigate = useNavigate()
   const subtitle = SUBTITLES[location.pathname] || 'Keep your home sparkling clean'
 
   async function handleSignOut() {
     const { error } = await supabase.auth.signOut()
     if (error) console.log(error)
+    else navigate('/')
   }
 
   return (

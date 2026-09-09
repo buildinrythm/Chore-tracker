@@ -3,9 +3,29 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { supabase } from './supabase.js'
 import Dashboard from './components/Dashboard.jsx'
 import Login from './components/Login.jsx'
+import Onboarding from './components/Onboarding.jsx'
 import TasksPage from './components/TasksPage.jsx'
 import UsersPage from './components/UsersPage.jsx'
 import AnalyticsPage from './components/AnalyticsPage.jsx'
+import { useChoreData } from './hooks/useChoreData.js'
+
+function AuthenticatedApp() {
+  const { me, loading, createHousehold, joinHousehold } = useChoreData()
+
+  if (loading) return null
+  if (!me) return <Onboarding onCreate={createHousehold} onJoin={joinHousehold} />
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
 
 function App() {
   const [session, setSession] = useState(null)
@@ -29,19 +49,9 @@ function App() {
   }
 
   if (!checkedSession) return null
-
   if (!session) return <Login onSession={handleSession} />
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/tasks" element={<TasksPage />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
-      </Routes>
-    </BrowserRouter>
-  )
+  return <AuthenticatedApp />
 }
 
 export default App

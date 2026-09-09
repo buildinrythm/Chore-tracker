@@ -1,6 +1,6 @@
 import Header from './Header.jsx'
 import { useChoreData } from '../hooks/useChoreData.js'
-import { isSameDay, frequencyLabel } from '../lib/chores.js'
+import { isSameDay } from '../lib/chores.js'
 import { CATEGORICAL } from '../lib/palette.js'
 import LineChart from './charts/LineChart.jsx'
 import BarChart from './charts/BarChart.jsx'
@@ -16,17 +16,24 @@ function lastNDays(n) {
   })
 }
 
+function frequencyBucket(frequency) {
+  if (!frequency) return 'One-time'
+  if (frequency === 1) return 'Daily'
+  if (frequency === 7) return 'Weekly'
+  return 'Other'
+}
+
 function AnalyticsPage() {
-  const { rooms, tasks, profiles, completions } = useChoreData()
+  const { rooms, tasks, members, logs } = useChoreData()
 
   const trendData = lastNDays(7).map((date) => ({
     label: date.toLocaleDateString(undefined, { weekday: 'short' }),
-    value: completions.filter((c) => isSameDay(new Date(c.completed_at), date)).length,
+    value: logs.filter((log) => isSameDay(new Date(log.completed_at), date)).length,
   }))
 
-  const byUserData = profiles.map((profile, i) => ({
-    label: profile.name,
-    value: completions.filter((c) => c.completed_by === profile.id).length,
+  const byUserData = members.map((member, i) => ({
+    label: member.name,
+    value: logs.filter((log) => log.user_id === member.id).length,
     color: CATEGORICAL[i % CATEGORICAL.length],
   }))
 
@@ -36,13 +43,11 @@ function AnalyticsPage() {
     color: CATEGORICAL[i % CATEGORICAL.length],
   }))
 
-  const frequencyCounts = { once: 0, daily: 0, weekly: 0 }
-  tasks.forEach((task) => { frequencyCounts[task.frequency] = (frequencyCounts[task.frequency] || 0) + 1 })
-  const frequencyData = ['daily', 'weekly', 'once'].map((freq, i) => ({
-    label: frequencyLabel(freq),
-    value: frequencyCounts[freq],
-    color: CATEGORICAL[i % CATEGORICAL.length],
-  }))
+  const frequencyCounts = { 'One-time': 0, Daily: 0, Weekly: 0, Other: 0 }
+  tasks.forEach((task) => { frequencyCounts[frequencyBucket(task.frequency)] += 1 })
+  const frequencyData = ['Daily', 'Weekly', 'One-time', 'Other']
+    .map((label, i) => ({ label, value: frequencyCounts[label], color: CATEGORICAL[i % CATEGORICAL.length] }))
+    .filter((d) => d.value > 0)
 
   return (
     <>

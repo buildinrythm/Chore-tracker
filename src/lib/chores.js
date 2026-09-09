@@ -47,37 +47,33 @@ export function timeAgo(date) {
   return `${daysSince} days ago`
 }
 
-export function cadenceDays(frequency) {
-  if (frequency === 'daily') return 1
-  if (frequency === 'weekly') return 7
-  return null
-}
-
+// frequency is null/0 for a one-time task (scheduled via due_date), or a
+// positive integer N meaning "repeat every N days" - same unit as
+// rooms.decay_rate, so the two share the same mental model.
 export function frequencyLabel(frequency) {
-  if (frequency === 'daily') return 'Daily'
-  if (frequency === 'weekly') return 'Weekly'
-  return 'One-time'
+  if (!frequency) return 'One-time'
+  if (frequency === 1) return 'Daily'
+  if (frequency === 7) return 'Weekly'
+  return `Every ${frequency} days`
 }
 
-// Recurring tasks (daily/weekly) stay on the list forever - completing one just
-// logs a completion timestamp, and it becomes "due" again once its cadence elapses.
+// Recurring tasks stay on the list forever - completing one just logs a
+// completion timestamp, and it becomes "due" again once its cadence elapses.
 export function isCompletedInCurrentCycle(task) {
-  if (!task.completed_at) return false
-  const days = cadenceDays(task.frequency)
-  if (days === null) return true
-  const diffDays = (Date.now() - new Date(task.completed_at).getTime()) / (1000 * 60 * 60 * 24)
-  return diffDays < days
+  if (!task.last_completed) return false
+  if (!task.frequency) return true
+  const diffDays = (Date.now() - new Date(task.last_completed).getTime()) / (1000 * 60 * 60 * 24)
+  return diffDays < task.frequency
 }
 
 export function isOverdue(task) {
   if (isCompletedInCurrentCycle(task)) return false
-  const days = cadenceDays(task.frequency)
-  if (days === null) {
+  if (!task.frequency) {
     return Boolean(task.due_date) && new Date(task.due_date) < startOfToday()
   }
-  const reference = new Date(task.completed_at || task.created_at).getTime()
+  const reference = new Date(task.last_completed || task.created_at).getTime()
   const diffDays = (Date.now() - reference) / (1000 * 60 * 60 * 24)
-  return diffDays > days
+  return diffDays > task.frequency
 }
 
 export function isOpenTask(task) {
