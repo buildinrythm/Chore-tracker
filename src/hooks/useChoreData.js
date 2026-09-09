@@ -53,6 +53,23 @@ export function useChoreData() {
     return { error }
   }
 
+  async function updateRoom(roomId, { name, decayRate }) {
+    const { error } = await supabase
+      .from('rooms')
+      .update({ name, decay_rate: decayRate })
+      .eq('id', roomId)
+    if (error) console.log(error)
+    else await fetchAll()
+    return { error }
+  }
+
+  async function deleteRoom(roomId) {
+    const { error } = await supabase.from('rooms').delete().eq('id', roomId)
+    if (error) console.log(error)
+    else await fetchAll()
+    return { error }
+  }
+
   async function addTask({ roomId, title, assignedTo, frequency, dueDate }) {
     const { error } = await supabase.from('tasks').insert({
       room_id: roomId,
@@ -61,6 +78,29 @@ export function useChoreData() {
       frequency: frequency || 'once',
       due_date: dueDate || null,
     })
+    if (error) console.log(error)
+    else await fetchAll()
+    return { error }
+  }
+
+  async function updateTask(taskId, { title, roomId, assignedTo, frequency, dueDate }) {
+    const { error } = await supabase
+      .from('tasks')
+      .update({
+        title,
+        room_id: roomId,
+        assigned_to: assignedTo || null,
+        frequency,
+        due_date: frequency === 'once' ? (dueDate || null) : null,
+      })
+      .eq('id', taskId)
+    if (error) console.log(error)
+    else await fetchAll()
+    return { error }
+  }
+
+  async function deleteTask(taskId) {
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId)
     if (error) console.log(error)
     else await fetchAll()
     return { error }
@@ -95,6 +135,23 @@ export function useChoreData() {
     return { error }
   }
 
+  async function updateMember(profileId, { name, avatar }) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ name, avatar })
+      .eq('id', profileId)
+    if (error) console.log(error)
+    else await fetchAll()
+    return { error }
+  }
+
+  async function deleteMember(profileId) {
+    const { error } = await supabase.from('profiles').delete().eq('id', profileId)
+    if (error) console.log(error)
+    else await fetchAll()
+    return { error }
+  }
+
   return {
     rooms,
     tasks,
@@ -103,9 +160,15 @@ export function useChoreData() {
     loading,
     refetch: fetchAll,
     addRoom,
+    updateRoom,
+    deleteRoom,
     markRoomCleaned,
     addTask,
+    updateTask,
+    deleteTask,
     markTaskComplete,
     addMember,
+    updateMember,
+    deleteMember,
   }
 }

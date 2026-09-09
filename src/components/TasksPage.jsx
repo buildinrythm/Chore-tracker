@@ -2,7 +2,7 @@ import Header from './Header.jsx'
 import { useState } from 'react'
 import { useChoreData } from '../hooks/useChoreData.js'
 import { isOverdue, isCompletedInCurrentCycle, frequencyLabel, timeAgo, roomIcons } from '../lib/chores.js'
-import { AlertCircle, Clock, User as UserIcon, Filter } from 'lucide-react'
+import { AlertCircle, Clock, User as UserIcon, Filter, Pencil, Trash2 } from 'lucide-react'
 import '../styles/TasksPage.css'
 
 const FILTERS = [
@@ -13,11 +13,57 @@ const FILTERS = [
 
 const EMPTY_FORM = { title: '', roomId: '', assignedTo: '', frequency: 'once', dueDate: '' }
 
+function TaskFields({ form, setForm, rooms, profiles }) {
+  return (
+    <>
+      <input
+        type="text"
+        placeholder="Task title"
+        value={form.title}
+        onChange={(e) => setForm({ ...form, title: e.target.value })}
+        required
+      />
+      <select value={form.roomId} onChange={(e) => setForm({ ...form, roomId: e.target.value })} required>
+        <option value="">Room...</option>
+        {rooms.map((room) => <option key={room.id} value={room.id}>{room.name}</option>)}
+      </select>
+      <select value={form.assignedTo} onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}>
+        <option value="">Unassigned</option>
+        {profiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
+      </select>
+      <select value={form.frequency} onChange={(e) => setForm({ ...form, frequency: e.target.value })}>
+        <option value="once">Once</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+      {form.frequency === 'once' && (
+        <input
+          type="date"
+          value={form.dueDate}
+          onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+        />
+      )}
+    </>
+  )
+}
+
+function taskToForm(task) {
+  return {
+    title: task.title,
+    roomId: String(task.room_id),
+    assignedTo: task.assigned_to || '',
+    frequency: task.frequency,
+    dueDate: task.due_date || '',
+  }
+}
+
 function TasksPage() {
-  const { rooms, tasks, profiles, addTask, markTaskComplete } = useChoreData()
+  const { rooms, tasks, profiles, addTask, updateTask, deleteTask, markTaskComplete } = useChoreData()
   const [filter, setFilter] = useState('all')
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
+  const [editingTaskId, setEditingTaskId] = useState(null)
+  const [editForm, setEditForm] = useState(EMPTY_FORM)
 
   const profileById = Object.fromEntries(profiles.map((profile) => [profile.id, profile]))
   const roomById = Object.fromEntries(rooms.map((room) => [room.id, room]))
@@ -45,6 +91,29 @@ function TasksPage() {
     }
   }
 
+  function startEditing(task) {
+    setEditingTaskId(task.id)
+    setEditForm(taskToForm(task))
+  }
+
+  async function handleUpdateTask(e) {
+    e.preventDefault()
+    if (!editForm.title.trim() || !editForm.roomId) return
+
+    const { error } = await updateTask(editingTaskId, {
+      title: editForm.title.trim(),
+      roomId: Number(editForm.roomId),
+      assignedTo: editForm.assignedTo || null,
+      frequency: editForm.frequency,
+      dueDate: editForm.dueDate,
+    })
+    if (!error) setEditingTaskId(null)
+  }
+
+  function handleDeleteTask(task) {
+    if (window.confirm(`Delete "${task.title}"?`)) deleteTask(task.id)
+  }
+
   const activeFilter = FILTERS.find((f) => f.key === filter)
 
   return (
@@ -69,33 +138,7 @@ function TasksPage() {
 
       {showForm && (
         <form className="task-form" onSubmit={handleAddTask}>
-          <input
-            type="text"
-            placeholder="Task title"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            required
-          />
-          <select value={form.roomId} onChange={(e) => setForm({ ...form, roomId: e.target.value })} required>
-            <option value="">Room...</option>
-            {rooms.map((room) => <option key={room.id} value={room.id}>{room.name}</option>)}
-          </select>
-          <select value={form.assignedTo} onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}>
-            <option value="">Unassigned</option>
-            {profiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
-          </select>
-          <select value={form.frequency} onChange={(e) => setForm({ ...form, frequency: e.target.value })}>
-            <option value="once">Once</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-          </select>
-          {form.frequency === 'once' && (
-            <input
-              type="date"
-              value={form.dueDate}
-              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-            />
-          )}
+          <TaskFields form={form} setForm={setForm} rooms={rooms} profiles={profiles} />
           <button type="submit" className="btn-primary">Add</button>
         </form>
       )}
@@ -104,6 +147,16 @@ function TasksPage() {
 
       <div className="task-list">
         {filteredTasks.map((task) => {
+          if (editingTaskId === task.id) {
+            return (
+              <form key={task.id} className="task-form task-edit-form" onSubmit={handleUpdateTask}>
+                <TaskFields form={editForm} setForm={setEditForm} rooms={rooms} profiles={profiles} />
+                <button type="submit" className="btn-primary">Save</button>
+                <button type="button" className="btn-secondary" onClick={() => setEditingTaskId(null)}>Cancel</button>
+              </form>
+            )
+          }
+
           const overdue = isOverdue(task)
           const completed = isCompletedInCurrentCycle(task)
           const assignee = profileById[task.assigned_to]
@@ -125,11 +178,19 @@ function TasksPage() {
                   )}
                 </div>
               </div>
-              {!(completed && task.frequency === 'once') && (
-                <button type="button" className="btn-secondary" onClick={() => markTaskComplete(task)}>
-                  Mark Complete
+              <div className="task-row-actions">
+                {!(completed && task.frequency === 'once') && (
+                  <button type="button" className="btn-secondary" onClick={() => markTaskComplete(task)}>
+                    Mark Complete
+                  </button>
+                )}
+                <button type="button" className="icon-btn" onClick={() => startEditing(task)} aria-label={`Edit ${task.title}`}>
+                  <Pencil size={16} />
                 </button>
-              )}
+                <button type="button" className="icon-btn" onClick={() => handleDeleteTask(task)} aria-label={`Delete ${task.title}`}>
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           )
         })}

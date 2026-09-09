@@ -138,3 +138,14 @@
   text-align: center;
   padding: 2rem 0;
 }
+
+.task-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.task-edit-form {
+  margin-bottom: 0;
+}

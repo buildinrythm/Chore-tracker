@@ -9,7 +9,7 @@ import { useChoreData } from '../hooks/useChoreData.js'
 import { getDecayPercentage, timeAgo, isOverdue, isOpenTask, isSameDay, roomIcons, roomColors } from '../lib/chores.js'
 
 function Dashboard() {
-  const { rooms, tasks, profiles, addRoom, markRoomCleaned } = useChoreData()
+  const { rooms, tasks, profiles, addRoom, updateRoom, deleteRoom, markRoomCleaned } = useChoreData()
   const [addingRoom, setAddingRoom] = useState(false)
   const [newRoomName, setNewRoomName] = useState('')
 
@@ -83,6 +83,7 @@ function Dashboard() {
             <RoomCard
               key={room.id}
               name={room.name}
+              decayRate={room.decay_rate}
               decayPercent={getDecayPercentage(room.last_cleaned, room.decay_rate)}
               lastCleaned={timeAgo(room.last_cleaned)}
               pendingTasks={openTasks.length}
@@ -90,6 +91,8 @@ function Dashboard() {
               color={roomColors[room.name] || '#DCFCE6'}
               icon={roomIcons[room.name] || '🏠'}
               onMarkCleaned={() => markRoomCleaned(room.id)}
+              onUpdate={(fields) => updateRoom(room.id, fields)}
+              onDelete={() => deleteRoom(room.id)}
             />
           )
         })}
