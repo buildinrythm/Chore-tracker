@@ -8,6 +8,12 @@
   gap: 1.5rem;
 }
 
+@media (max-width: 900px) {
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .analytics-card {
   background: white;
   border-radius: 0.75rem;

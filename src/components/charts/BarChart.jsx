@@ -1,5 +1,12 @@
 import '../../styles/Charts.css'
 
+const MAX_LABEL_CHARS = 8
+
+function truncateLabel(label) {
+  if (label.length <= MAX_LABEL_CHARS) return label
+  return `${label.slice(0, MAX_LABEL_CHARS)}…`
+}
+
 function BarChart({ data, height = 220 }) {
   const max = Math.max(1, ...data.map((d) => d.value))
   const barWidth = 28
@@ -20,9 +27,10 @@ function BarChart({ data, height = 220 }) {
         const y = padding.top + innerH - barHeight
         return (
           <g key={d.label}>
+            <title>{d.label}: {d.value}</title>
             <rect x={x} y={y} width={barWidth} height={Math.max(barHeight, 1)} rx={4} fill={d.color} />
             <text x={x + barWidth / 2} y={y - 6} textAnchor="middle" className="chart-value-label">{d.value}</text>
-            <text x={x + barWidth / 2} y={height - 8} textAnchor="middle" className="chart-axis-label">{d.label}</text>
+            <text x={x + barWidth / 2} y={height - 8} textAnchor="middle" className="chart-axis-label">{truncateLabel(d.label)}</text>
           </g>
         )
       })}

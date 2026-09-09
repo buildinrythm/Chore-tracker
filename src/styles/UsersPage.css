@@ -7,6 +7,7 @@
 
 .member-form {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   background: white;
   border-radius: 0.75rem;
@@ -31,6 +32,12 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .podium {
+    grid-template-columns: 1fr;
+  }
 }
 
 .podium-card {
@@ -92,12 +99,20 @@
 
 .member-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
   border: 1px solid #e5e7eb;
   border-radius: 0.75rem;
   padding: 1rem 1.25rem;
   margin-bottom: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .member-row-stats {
+    flex-basis: 100%;
+    justify-content: space-between;
+  }
 }
 
 .member-rank {
