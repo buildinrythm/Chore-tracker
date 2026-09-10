@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ChoreTracker</string>
+    <string name="title_activity_main">ChoreTracker</string>
+    <string name="package_name">com.choretracker.app</string>
+    <string name="custom_url_scheme">com.choretracker.app</string>
+</resources>
